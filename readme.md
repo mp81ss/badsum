@@ -8,7 +8,7 @@ A md5/sha1 hash calculator
 4. make
 
 ### Binaries
-Windows package is available on the [release](https://github.com/mp81ss/yacut/releases) page
+Windows package is available on the [release](https://github.com/mp81ss/badsum/releases) page
 
 ### Notes
 md5 is 3x faster then linux shipped md5sum, while sha1 is 2.7x faster then sha1sum
