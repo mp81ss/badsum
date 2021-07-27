@@ -11,4 +11,6 @@ A md5/sha1 hash calculator
 Windows package is available on the [release](https://github.com/mp81ss/badsum/releases) page
 
 ### Notes
-md5 is 3x faster then linux shipped md5sum, while sha1 is 2.7x faster then sha1sum
+Performances vary a lot across distro and file locations (Disk, filesystem, etc.)
+Generally, badsum is faster than linux shipped md5sum/sha1sum
+Read benchmark file for details
