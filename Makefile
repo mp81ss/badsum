@@ -1,12 +1,11 @@
-CC?=gcc
-CFLAGS=-std=c99 -march=x86-64 -O2 -fpic
+CC=gcc
+CFLAGS=-Wall -Wextra -pedantic -march=x86-64 -O2
 FASM_FLAGS=-d OS=LINUX
 
 .PHONY: clean
 
 badsum: md5.o sha1.o
-	$(CC) $(CFLAGS) -c badsum.c
-	$(CC) -fpie -o $@ badsum.o md5.o sha1.o
+	$(CC) $(CFLAGS) -s -o $@ badsum.c $^
 
 md5.o: md5.asm
 	fasm $(FASM_FLAGS) $< 

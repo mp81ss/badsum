@@ -2,6 +2,10 @@
 #include <string.h>
 #include <stdint.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+
 
 #define IO_BUF_SIZE (256U << 10U)
 
@@ -56,26 +60,28 @@ static const char* get_basename(const char* name) {
 
 static void process_file(const char* name)
 {
-    FILE* handle;
+    int handle;
     const char* error_msg = "Cannot open file";
     const char* const bn = get_basename(name);
 
-    handle = fopen(name, "rb");
-    if (handle != NULL) {
-        size_t red;
+    handle = open(name, O_RDONLY);
+    if (handle != -1) {
+        ssize_t red;
 
         error_msg = NULL;
 
+        posix_fadvise(handle, 0, 0, POSIX_FADV_SEQUENTIAL);
+
         initer(&ctx);
 
-        red = fread(buffer, 1U, IO_BUF_SIZE, handle);
-        while (red > 0U && ferror(handle) == 0) {
+        red = read(handle, buffer, IO_BUF_SIZE);
+        while (red > 0) {
             updater(&ctx, buffer, (uint32_t)red);
-            red = fread(buffer, 1U, IO_BUF_SIZE, handle);
+            red = read(handle, buffer, IO_BUF_SIZE);
         }
 
-        if (ferror(handle) == 0) {
-            const uint8_t* p = finisher(&ctx);
+        if (red == 0) {
+            const uint8_t* const p = finisher(&ctx);
             for (uint32_t i = 0U; i < hash_len; i++) {
                 printf("%02x", p[i]);
             }
@@ -85,7 +91,7 @@ static void process_file(const char* name)
             error_msg = "Cannot read file";
         }
 
-        fclose(handle);
+        close(handle);
     }
 
     if (error_msg != NULL) {
@@ -100,8 +106,6 @@ int main(int argc, char* argv[])
     if ((argc >= 3)
         && ((strcmp(argv[1], "-md5") == 0) || (strcmp(argv[1], "-sha1") == 0)))
     {
-        int i;
-
         if (argv[1][1] == 'm') {
             initer = (initer_t)&md5_init;
             updater = (updater_t)&md5_update;
@@ -117,12 +121,19 @@ int main(int argc, char* argv[])
             hash_len = 20U;
         }
 
-        for (i = 2; i < argc; i++) {
+        mlockall(MCL_CURRENT);
+
+        for (int i = 2; i < argc; i++) {
             struct stat s;
             if ((stat(argv[i], &s) != 0) || (S_ISDIR(s.st_mode) == 0U)) {
                 process_file(argv[i]);
             }
         }
+
+#if 0
+        munlockall();
+#endif
+
     }
     else {
         puts("Enter: badsum <-md5|-sha1> <file[s]>");
