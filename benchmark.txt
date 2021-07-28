@@ -10,11 +10,15 @@ Host was Windows 10, i3-6100, 32GB of ram, HDD was 2TB Sata (6Gb/s) 7200 rpm
 
 Time is expressed in seconds
 
-md5sum:     5.75
-sha1sum:    9.35
+badsumd5:     5.29
+badsha1sum:   5.53
 
-badsumd5:   5.37
-badsha1sum: 5.63
+md5sum:       5.70
+sha1sum:      9.21
+
+openssl-md5:  5.53
+openssl-sha1: 5.43
 
 Summary:
-On Alpine Linux, badsumd5 is slightly faster. badsum sha1 is 1.65x faster
+badsumd5 is faster then others
+badsum-sha1 is faster then sha1sum but slower then openssl-sha1
