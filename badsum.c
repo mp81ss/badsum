@@ -4,7 +4,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 
 
 #define IO_BUF_SIZE (256U << 10U)
@@ -70,7 +72,9 @@ static void process_file(const char* name)
 
         error_msg = NULL;
 
+#ifndef _WIN32
         posix_fadvise(handle, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif
 
         initer(&ctx);
 
@@ -121,7 +125,13 @@ int main(int argc, char* argv[])
             hash_len = 20U;
         }
 
+#ifndef _WIN32
+#ifndef __CYGWIN__
         mlockall(MCL_CURRENT);
+#else
+        mlock(&buffer, IO_BUF_SIZE);
+#endif
+#endif
 
         for (int i = 2; i < argc; i++) {
             struct stat s;
@@ -129,11 +139,6 @@ int main(int argc, char* argv[])
                 process_file(argv[i]);
             }
         }
-
-#if 0
-        munlockall();
-#endif
-
     }
     else {
         puts("Enter: badsum <-md5|-sha1> <file[s]>");
