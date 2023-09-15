@@ -1,3 +1,6 @@
+# ARCHIVED - Moved to gitlab
+
+
 # badsum
 A md5/sha1 hash calculator
 
